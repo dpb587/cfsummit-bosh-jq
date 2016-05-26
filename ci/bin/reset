@@ -1,0 +1,27 @@
+#!/bin/bash
+
+# for resetting the environment while testing
+
+set -eux
+
+cd "$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/../.."
+
+( cd bosh
+
+  rm -f bosh-init-state.json
+  rm -f director
+  rm -fr config/ssl
+  rm -f config/credentials.json
+)
+
+( cd cf
+
+  rm -fr config/blobstore
+  rm -fr config/consul-certs
+  rm -fr config/haproxy
+  rm -fr config/hm9000
+  rm -fr config/uaa-jwt
+  rm -f config/settings.json
+)
+
+echo "MANUALLY update env.json: management_cidrs"

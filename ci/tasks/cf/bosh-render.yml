@@ -1,0 +1,17 @@
+---
+platform: "linux"
+image_resource:
+  type: "docker-image"
+  source:
+    repository: "dpb587/jq"
+inputs:
+  - name: "env"
+  - name: "cf-stack"
+outputs:
+  - name: "render"
+run:
+  path: "env/ci/bin/render"
+  args:
+    - "env/cf/bosh.jq"
+params:
+  REDIRECT_STDOUT: "render/bosh.json"

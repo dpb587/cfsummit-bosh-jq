@@ -1,0 +1,6 @@
+{
+  "name": "bosh-aws-xen-hvm-ubuntu-trusty-go_agent",
+  "sha1": "ac920cae17c7159dee3bf1ebac727ce2d01564e9",
+  "url": "https://d26ekeud912fhb.cloudfront.net/bosh-stemcell/aws/light-bosh-stemcell-3232.4-aws-xen-hvm-ubuntu-trusty-go_agent.tgz",
+  "version": "3232.4"
+}

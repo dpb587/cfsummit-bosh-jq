@@ -1,0 +1,19 @@
+---
+platform: "linux"
+image_resource:
+  type: "docker-image"
+  source:
+    repository: "bosh/init"
+inputs:
+  - name: "env"
+  - name: "input"
+outputs:
+  - name: "env"
+    path: "env-out"
+run:
+  path: "env/ci/tasks/bosh/create/execute.sh"
+params:
+  ssh_key: required
+  state_file: "bosh/bosh-init-state.json"
+  git_user_name: "CI Bot"
+  git_user_email: "ci@localhost"

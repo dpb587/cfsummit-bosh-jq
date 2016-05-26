@@ -1,0 +1,31 @@
+#!/bin/sh
+
+set -eux
+
+case "$1" in
+  username)
+    cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 16
+    ;;
+  password)
+    cat /dev/urandom | LC_CTYPE=C tr -dc 'a-zA-Z0-9' | head -c 32
+    ;;
+  ssl-ca)
+    openssl genrsa -out ca.key 2048
+    yes "" | openssl req -x509 -new -nodes -key ca.key -out ca.crt -days 365
+    ;;
+  ssl-pair)
+    openssl genrsa -out "${3:-$2}.key" 2048
+    openssl req -new -nodes -key "${3:-$2}.key" -out "${3:-$2}.csr" -subj "/C=US/O=cfsummit-bosh-jq/CN=$2"
+    openssl x509 -req -in "${3:-$2}.csr" -CA ca.crt -CAkey ca.key -CAcreateserial -out "${3:-$2}.crt"
+    rm "${3:-$2}.csr"
+    ;;
+  ssl-asymmetric-pair)
+    openssl genrsa -out private.pem 2048
+    openssl rsa -pubout -in private.pem -out public.pem
+    ;;
+  *)
+    echo "unsupported data type" >&2
+    exit 1
+esac
+
+echo

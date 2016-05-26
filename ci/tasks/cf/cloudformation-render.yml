@@ -1,0 +1,17 @@
+---
+platform: "linux"
+image_resource:
+  type: "docker-image"
+  source:
+    repository: "dpb587/jq"
+inputs:
+  - name: "env"
+  - name: "infra-stack"
+outputs:
+  - name: "render"
+run:
+  path: "env/ci/bin/render"
+  args:
+    - "env/cf/cloudformation.jq"
+params:
+  REDIRECT_STDOUT: "render/cloudformation.json"

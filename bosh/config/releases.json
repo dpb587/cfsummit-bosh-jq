@@ -1,0 +1,14 @@
+[
+  {
+    "name": "bosh",
+    "version": "256.2",
+    "url": "https://bosh.io/d/github.com/cloudfoundry/bosh?v=256.2",
+    "sha1": "ff2f4e16e02f66b31c595196052a809100cfd5a8"
+  },
+  {
+    "name": "bosh-aws-cpi",
+    "version": "52",
+    "url": "https://bosh.io/d/github.com/cloudfoundry-incubator/bosh-aws-cpi-release?v=52",
+    "sha1": "dc4a0cca3b33dce291e4fbeb9e9948b6a7be3324"
+  }
+]

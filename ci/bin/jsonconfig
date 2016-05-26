@@ -1,0 +1,35 @@
+#!/bin/sh
+
+set -eu
+
+case "$1" in
+  exists-or-put)
+    if ! $0 exists "$2" "$3" ; then
+      $0 put "$2" "$3" "$4"
+    fi
+    ;;
+  exists)
+    [ -e "$2" ] || exit 1
+    ( echo '[' ; cat "$2" ; echo ']' ) | jq -e --arg k "$3" '( .[0] // {} ) | has($k)' > /dev/null
+    exit $?
+    ;;
+  get)
+    [ -e "$2" ] || exit 1
+    jq -r --arg k "$3" '.[$k]' < "$2"
+    ;;
+  put)
+    [ -e "$2" ] || touch "$2"
+    cp "$2" "$2.tmp"
+    ( echo '[' ; cat "$2.tmp" ; echo ']' ) | jq -S --arg k "$3" --arg v "$4" '.[0] + { ($k) : ($v) }' > "$2"
+    rm "$2.tmp"
+    ;;
+  delete)
+    [ -e "$2" ] || exit
+    cp "$2" "$2.tmp"
+    ( echo '[' ; cat "$2.tmp" ; echo ']' ) | jq -S --arg k "$3" '.[0] // {} | to_entries | select(.key != $k) | from_entries' > "$2"
+    rm "$2.tmp"
+    ;;
+  *)
+    echo "unsupported operation" >&2
+    exit 1
+esac

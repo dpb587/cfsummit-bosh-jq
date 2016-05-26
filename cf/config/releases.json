@@ -1,0 +1,8 @@
+[
+  {
+    "name": "cf",
+    "sha1": "8996122278b03b6ba21ec673812d2075c37f1097",
+    "version": "237",
+    "url": "https://bosh.io/d/github.com/cloudfoundry/cf-release?v=237"
+  }
+]

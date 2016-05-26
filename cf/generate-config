@@ -1,0 +1,40 @@
+#!/bin/sh
+
+set -eu
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PATH="$DIR/../ci/bin:$PATH"
+
+cd $DIR/config
+
+system_domain=$( jsonconfig get settings.json system_domain )
+
+( mkdir -p haproxy ; cd haproxy
+  if [ ! -e ssl.key ] ; then
+    openssl req -new -newkey rsa:2048 -days 365 -nodes -x509 \
+      -subj "/C=US/ST=California/L=Oakland/O=ACME BOSH/CN=*.$system_domain" \
+      -keyout ssl.key \
+      -out ssl.crt
+  fi
+)
+
+( mkdir -p blobstore ; cd blobstore
+  [ -e ca.key ] || lorem ssl-ca
+  [ -e tls.key ] || lorem ssl-pair tls
+)
+
+if [ ! -e consul-certs ] ; then
+  wget -O/tmp/generate-certs https://raw.githubusercontent.com/cloudfoundry-incubator/consul-release/866893cda67d50477847248276b2c0ecbbb9460a/scripts/generate-certs
+  chmod +x /tmp/generate-certs
+  /tmp/generate-certs
+fi
+
+( mkdir -p hm9000 ; cd hm9000
+  [ -e ca.key ] || lorem ssl-ca
+  [ -e client.key ] || lorem ssl-pair client
+  [ -e server.key ] || lorem ssl-pair server
+)
+
+( mkdir -p uaa-jwt ; cd uaa-jwt
+  [ -e private.pem ] || lorem ssl-asymmetric-pair
+)

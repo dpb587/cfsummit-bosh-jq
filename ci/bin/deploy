@@ -1,0 +1,17 @@
+#!/bin/bash
+
+set -eu
+
+# args: target
+target_name="$1"
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+cd $DIR/../..
+
+pipeline_name="$( ci/bin/jsonconfig get env.json name )"
+
+fly -t "$target_name" set-pipeline -p "$pipeline_name" -c <( ci/bin/render ci/pipeline.jq )
+
+fly -t "$target_name" unpause-pipeline -p "$pipeline_name"
+
+open $( fly targets | grep "^$target_name " | awk '{ print $2 }' )/pipelines/$pipeline_name

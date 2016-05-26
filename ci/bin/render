@@ -1,0 +1,97 @@
+#!/bin/bash
+
+set -eu
+
+if [ -n "${REDIRECT_STDOUT:-}" ] ; then
+  exec 1>$REDIRECT_STDOUT
+fi
+
+# args: jq-path
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+ENV_DIR=$( dirname $( dirname "$DIR" ) )
+
+TEMPLATE="$1"
+TEMPLATE_DIR=$( cd "$( dirname "$TEMPLATE" )" && pwd )""
+
+JQ_ARGS="${JQ_ARGS:-}"
+
+#
+# the env file should always be present and contains a few global config keys
+# which may be useful to us
+#
+
+if [ -e "$ENV_DIR/env.json" ] ; then
+  JQ_ARGS="$JQ_ARGS --argfile env $ENV_DIR/env.json"
+fi
+
+#
+# if we have any directories named *-stack, assume they're stack resources that
+# we have asked for. load the resources, outputs, and arn details
+#
+
+if [ -n "$( find . -maxdepth 1 -name '*-stack' 2>/dev/null )" ] ; then
+  for STACK_DIR in *-stack ; do
+    STACK_NAME=$( basename "$STACK_DIR" | sed 's/-stack$//' | tr '-' '_' )
+    STACK_ARN=$( cat $STACK_DIR/arn.txt )
+    STACK_ARN="${STACK_ARN:-UNKNOWN}"
+  
+    JQ_ARGS="$JQ_ARGS --argfile ${STACK_NAME}_stack $STACK_DIR/resources.json"
+    JQ_ARGS="$JQ_ARGS --arg ${STACK_NAME}_stack_arn \"$STACK_ARN\""
+    
+    if [ -e "$STACK_DIR/outputs.json" ] ; then
+      JQ_ARGS="$JQ_ARGS --argfile ${STACK_NAME}_stack_outputs $STACK_DIR/outputs.json"
+    fi
+  done
+fi
+
+#
+# a config directory alongside the template will include files which should be
+# important for our script. parse JSON files into objects, and load other files
+# into strings. the variable name is the relative file path (converting
+# non-alphanumerics to underscores; e.g. config/test.me -> $config_test_me)
+#
+
+if [ -n "$( cd $TEMPLATE_DIR ; find config -not -type d 2>/dev/null )" ] ; then
+  for CONFIG_PATH in $( cd $TEMPLATE_DIR ; find config -not -type d ) ; do
+    CONFIG_NAME=$( echo "$CONFIG_PATH" | sed 's/[^a-z0-9_]/_/g' )
+  
+    if [[ "$CONFIG_PATH" =~ ".json" ]] ; then
+      CONFIG_NAME=$( echo "$CONFIG_NAME" | sed 's/_json$//' )
+      JQ_ARGS="$JQ_ARGS --argfile $CONFIG_NAME $TEMPLATE_DIR/$CONFIG_PATH"
+    else
+      TMP=$( mktemp -t "$(basename $0).XXXXXXXXXX" )
+      jq -s -R '.' < $TEMPLATE_DIR/$CONFIG_PATH > $TMP
+      JQ_ARGS="$JQ_ARGS --argfile $CONFIG_NAME $TMP"
+    fi
+  done
+fi
+
+#
+# render our result!
+#
+
+TMPFILE=/tmp/rendered-$$
+
+jq -S -n $JQ_ARGS -f $TEMPLATE > $TMPFILE.old
+
+#
+# some templates may need additional post-processing. If they have a
+# _transformers key, pass through our result for further modifications
+#
+
+jq -r \
+  --arg tmp $TMPFILE \
+  '
+    ( ._transformers // [] ) | map( . + " < " + $tmp + ".old > " + $tmp + ".new ; cp " + $tmp + ".{new,old}" )[]
+  ' \
+  < $TMPFILE.old \
+  > $TMPFILE.transforms
+
+sh $TMPFILE.transforms
+
+#
+# done!
+#
+
+cat $TMPFILE.old

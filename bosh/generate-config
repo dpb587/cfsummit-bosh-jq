@@ -1,0 +1,37 @@
+#!/bin/sh
+
+set -eu
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+PATH="$DIR/../ci/bin:$PATH"
+
+cd $DIR/config
+
+jsonconfig exists-or-put credentials.json postgres_user "$( lorem username )"
+jsonconfig exists-or-put credentials.json postgres_password "$( lorem password )"
+
+jsonconfig exists-or-put credentials.json nats_user "$( lorem username )"
+jsonconfig exists-or-put credentials.json nats_password "$( lorem password )"
+
+jsonconfig exists-or-put credentials.json mbus_user "$( lorem username )"
+jsonconfig exists-or-put credentials.json mbus_password "$( lorem password )"
+
+jsonconfig exists-or-put credentials.json registry_user "$( lorem username )"
+jsonconfig exists-or-put credentials.json registry_password "$( lorem password )"
+
+jsonconfig exists-or-put credentials.json blobstore_director_user "$( lorem username )"
+jsonconfig exists-or-put credentials.json blobstore_director_password "$( lorem password )"
+
+jsonconfig exists-or-put credentials.json blobstore_agent_user "$( lorem username )"
+jsonconfig exists-or-put credentials.json blobstore_agent_password "$( lorem password )"
+
+jsonconfig exists-or-put credentials.json hm_director_user "$( lorem username )"
+jsonconfig exists-or-put credentials.json hm_director_password "$( lorem password )"
+
+jsonconfig exists-or-put credentials.json hm_http_user "$( lorem username )"
+jsonconfig exists-or-put credentials.json hm_http_password "$( lorem password )"
+
+( mkdir -p ssl ; cd ssl
+  [ -e ca.key ] || lorem ssl-ca
+  [ -e director.key ] || lorem ssl-pair director
+)
