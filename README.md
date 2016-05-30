@@ -1,6 +1,6 @@
 # cfsummit-bosh-jq
 
-An example of using [`jq`](https://stedolan.github.io/jq/) to help abstract and compose manifests for BOSH and letting Concourse deploy changes. This was presented with [slides](https://docs.google.com/presentation/d/1-zZLjzRKghvO0rsZoxbziNxZYqQlf4WhpFIkEBDDmsk/view) as a Lightning Talk at CF Summit on May 26, 2016. It was based on my earlier blog post, [Composing Configurations with JQ](https://dpb587.me/blog/2016/04/26/composing-configurations-with-jq.html). See the slides, read the post, or ask me for a walkthrough.
+An example of using [`jq`](https://stedolan.github.io/jq/) to help abstract and compose manifests for BOSH and letting Concourse deploy changes. This was presented with [slides](https://docs.google.com/presentation/d/1PiiO6ckMY5xZDJHcpu4JjpOMZu_F04D8Sd-krVv1rG0/view) as a Lightning Talk at CF Summit on May 26, 2016. It was based on my earlier blog post, [Composing Configurations with JQ](https://dpb587.me/blog/2016/04/26/composing-configurations-with-jq.html). See the slides, read the post, or ask me for a walkthrough.
 
 Caveat emptor...
 
